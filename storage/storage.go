@@ -3,8 +3,8 @@ package storage
 import (
 	"github.com/jmoiron/sqlx"
 
-	"github.com/samandar2605/medium_user_service/storage/repo"
 	"github.com/samandar2605/medium_user_service/storage/postgres"
+	"github.com/samandar2605/medium_user_service/storage/repo"
 )
 
 type StorageI interface {

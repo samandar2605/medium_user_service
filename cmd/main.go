@@ -8,15 +8,15 @@ import (
 	"github.com/go-redis/redis/v9"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-
 	pb "github.com/samandar2605/medium_user_service/genproto/user_service"
-	grpcPkg "github.com/samandar2605/medium_user_service/pkg/grpc_client"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
 	"github.com/samandar2605/medium_user_service/config"
 	"github.com/samandar2605/medium_user_service/service"
 	"github.com/samandar2605/medium_user_service/storage"
+
+	grpcPkg "github.com/samandar2605/medium_user_service/pkg/grpc_client"
 )
 
 func main() {
@@ -38,6 +38,7 @@ func main() {
 	rdb := redis.NewClient(&redis.Options{
 		Addr: cfg.Redis.Addr,
 	})
+
 	strg := storage.NewStoragePg(psqlConn)
 	inMemory := storage.NewInMemoryStorage(rdb)
 
@@ -48,10 +49,12 @@ func main() {
 
 	userService := service.NewUserService(strg, inMemory)
 	authService := service.NewAuthService(strg, inMemory, grpcConn, cfg)
+
 	lis, err := net.Listen("tcp", cfg.GrpcPort)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+
 	s := grpc.NewServer()
 	reflection.Register(s)
 
