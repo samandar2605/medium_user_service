@@ -31,6 +31,7 @@ func NewAuthService(strg storage.StorageI, inMemory storage.InMemoryStorageI, gr
 		storage:    strg,
 		inMemory:   inMemory,
 		grpcClient: grpcConn,
+		UnimplementedAuthServiceServer: pb.UnimplementedAuthServiceServer{},
 		cfg: &config.Config{
 			Postgres:                    cfg.Postgres,
 			GrpcPort:                    cfg.GrpcPort,

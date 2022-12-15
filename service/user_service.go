@@ -22,6 +22,7 @@ func NewUserService(strg storage.StorageI, inMemory storage.InMemoryStorageI) *U
 	return &UserService{
 		storage:  strg,
 		inMemory: inMemory,
+		UnimplementedUserServiceServer: pb.UnimplementedUserServiceServer{},
 	}
 }
 
