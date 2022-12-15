@@ -23,10 +23,10 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CategoryServiceClient interface {
 	Create(ctx context.Context, in *Category, opts ...grpc.CallOption) (*Category, error)
-	Get(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*Category, error)
+	Get(ctx context.Context, in *IdByRequest, opts ...grpc.CallOption) (*Category, error)
 	GetAll(ctx context.Context, in *GetCategoryRequest, opts ...grpc.CallOption) (*GetCategoryResponse, error)
 	Update(ctx context.Context, in *Category, opts ...grpc.CallOption) (*Category, error)
-	Delete(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*Empty, error)
+	Delete(ctx context.Context, in *IdByRequest, opts ...grpc.CallOption) (*Blank, error)
 }
 
 type categoryServiceClient struct {
@@ -46,7 +46,7 @@ func (c *categoryServiceClient) Create(ctx context.Context, in *Category, opts .
 	return out, nil
 }
 
-func (c *categoryServiceClient) Get(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*Category, error) {
+func (c *categoryServiceClient) Get(ctx context.Context, in *IdByRequest, opts ...grpc.CallOption) (*Category, error) {
 	out := new(Category)
 	err := c.cc.Invoke(ctx, "/genproto.CategoryService/Get", in, out, opts...)
 	if err != nil {
@@ -73,8 +73,8 @@ func (c *categoryServiceClient) Update(ctx context.Context, in *Category, opts .
 	return out, nil
 }
 
-func (c *categoryServiceClient) Delete(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
+func (c *categoryServiceClient) Delete(ctx context.Context, in *IdByRequest, opts ...grpc.CallOption) (*Blank, error) {
+	out := new(Blank)
 	err := c.cc.Invoke(ctx, "/genproto.CategoryService/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -87,10 +87,10 @@ func (c *categoryServiceClient) Delete(ctx context.Context, in *IdRequest, opts 
 // for forward compatibility
 type CategoryServiceServer interface {
 	Create(context.Context, *Category) (*Category, error)
-	Get(context.Context, *IdRequest) (*Category, error)
+	Get(context.Context, *IdByRequest) (*Category, error)
 	GetAll(context.Context, *GetCategoryRequest) (*GetCategoryResponse, error)
 	Update(context.Context, *Category) (*Category, error)
-	Delete(context.Context, *IdRequest) (*Empty, error)
+	Delete(context.Context, *IdByRequest) (*Blank, error)
 	mustEmbedUnimplementedCategoryServiceServer()
 }
 
@@ -101,7 +101,7 @@ type UnimplementedCategoryServiceServer struct {
 func (UnimplementedCategoryServiceServer) Create(context.Context, *Category) (*Category, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
-func (UnimplementedCategoryServiceServer) Get(context.Context, *IdRequest) (*Category, error) {
+func (UnimplementedCategoryServiceServer) Get(context.Context, *IdByRequest) (*Category, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
 func (UnimplementedCategoryServiceServer) GetAll(context.Context, *GetCategoryRequest) (*GetCategoryResponse, error) {
@@ -110,7 +110,7 @@ func (UnimplementedCategoryServiceServer) GetAll(context.Context, *GetCategoryRe
 func (UnimplementedCategoryServiceServer) Update(context.Context, *Category) (*Category, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
-func (UnimplementedCategoryServiceServer) Delete(context.Context, *IdRequest) (*Empty, error) {
+func (UnimplementedCategoryServiceServer) Delete(context.Context, *IdByRequest) (*Blank, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
 func (UnimplementedCategoryServiceServer) mustEmbedUnimplementedCategoryServiceServer() {}
@@ -145,7 +145,7 @@ func _CategoryService_Create_Handler(srv interface{}, ctx context.Context, dec f
 }
 
 func _CategoryService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(IdRequest)
+	in := new(IdByRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -157,7 +157,7 @@ func _CategoryService_Get_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: "/genproto.CategoryService/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CategoryServiceServer).Get(ctx, req.(*IdRequest))
+		return srv.(CategoryServiceServer).Get(ctx, req.(*IdByRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -199,7 +199,7 @@ func _CategoryService_Update_Handler(srv interface{}, ctx context.Context, dec f
 }
 
 func _CategoryService_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(IdRequest)
+	in := new(IdByRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -211,7 +211,7 @@ func _CategoryService_Delete_Handler(srv interface{}, ctx context.Context, dec f
 		FullMethod: "/genproto.CategoryService/Delete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CategoryServiceServer).Delete(ctx, req.(*IdRequest))
+		return srv.(CategoryServiceServer).Delete(ctx, req.(*IdByRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

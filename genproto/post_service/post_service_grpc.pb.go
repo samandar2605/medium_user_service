@@ -26,7 +26,7 @@ type PostServiceClient interface {
 	Get(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*Post, error)
 	GetAll(ctx context.Context, in *GetAllPostsRequest, opts ...grpc.CallOption) (*GetAllPostsResponse, error)
 	Update(ctx context.Context, in *Post, opts ...grpc.CallOption) (*Post, error)
-	Delete(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*Empty, error)
+	Delete(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*Blank, error)
 }
 
 type postServiceClient struct {
@@ -73,8 +73,8 @@ func (c *postServiceClient) Update(ctx context.Context, in *Post, opts ...grpc.C
 	return out, nil
 }
 
-func (c *postServiceClient) Delete(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
+func (c *postServiceClient) Delete(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*Blank, error) {
+	out := new(Blank)
 	err := c.cc.Invoke(ctx, "/genproto.PostService/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -90,7 +90,7 @@ type PostServiceServer interface {
 	Get(context.Context, *GetPostRequest) (*Post, error)
 	GetAll(context.Context, *GetAllPostsRequest) (*GetAllPostsResponse, error)
 	Update(context.Context, *Post) (*Post, error)
-	Delete(context.Context, *GetPostRequest) (*Empty, error)
+	Delete(context.Context, *GetPostRequest) (*Blank, error)
 	mustEmbedUnimplementedPostServiceServer()
 }
 
@@ -110,7 +110,7 @@ func (UnimplementedPostServiceServer) GetAll(context.Context, *GetAllPostsReques
 func (UnimplementedPostServiceServer) Update(context.Context, *Post) (*Post, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
-func (UnimplementedPostServiceServer) Delete(context.Context, *GetPostRequest) (*Empty, error) {
+func (UnimplementedPostServiceServer) Delete(context.Context, *GetPostRequest) (*Blank, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
 func (UnimplementedPostServiceServer) mustEmbedUnimplementedPostServiceServer() {}
