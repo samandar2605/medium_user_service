@@ -28,18 +28,11 @@ type AuthService struct {
 
 func NewAuthService(strg storage.StorageI, inMemory storage.InMemoryStorageI, grpcConn grpcPkg.GrpcClientI, cfg config.Config) *AuthService {
 	return &AuthService{
-		storage:    strg,
-		inMemory:   inMemory,
-		grpcClient: grpcConn,
+		storage:                        strg,
+		inMemory:                       inMemory,
+		grpcClient:                     grpcConn,
 		UnimplementedAuthServiceServer: pb.UnimplementedAuthServiceServer{},
-		cfg: &config.Config{
-			Postgres:                    cfg.Postgres,
-			GrpcPort:                    cfg.GrpcPort,
-			Redis:                       cfg.Redis,
-			AuthSecretKey:               cfg.AuthSecretKey,
-			NotificationServiceGrpcPort: cfg.NotificationServiceGrpcPort,
-			NotificationServiceHost:     cfg.NotificationServiceHost,
-		},
+		cfg:                            &cfg,
 	}
 }
 
@@ -53,6 +46,7 @@ func (s *AuthService) Register(ctx context.Context, req *pb.RegisterRequest) (*p
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Internal server error: %v", err)
 	}
+	fmt.Println("56 Auth'ga kirdi")
 
 	user := repo.User{
 		FirstName: req.FirstName,
@@ -66,6 +60,7 @@ func (s *AuthService) Register(ctx context.Context, req *pb.RegisterRequest) (*p
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Internal server error: %v", err)
 	}
+	fmt.Println("70 Auth'ga kirdi")
 
 	err = s.inMemory.Set("user_"+user.Email, string(userData), 10*time.Minute)
 	if err != nil {
