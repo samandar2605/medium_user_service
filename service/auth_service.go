@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/samandar2605/medium_user_service/config"
-	"github.com/samandar2605/medium_user_service/genproto/notification_service"
+	pbn "github.com/samandar2605/medium_user_service/genproto/notification_service"
 	pb "github.com/samandar2605/medium_user_service/genproto/user_service"
 	grpcPkg "github.com/samandar2605/medium_user_service/pkg/grpc_client"
 	"github.com/samandar2605/medium_user_service/pkg/utils"
@@ -233,7 +233,7 @@ func (s *AuthService) sendVerificationCode(key, email string) error {
 		return err
 	}
 
-	_, err = s.grpcClient.NotificationService().SendEmail(context.Background(), &notification_service.SendEmailRequest{
+	_, err = s.grpcClient.NotificationService().SendEmail(context.Background(), &pbn.SendEmailRequest{
 		To:      email,
 		Subject: "Verification email",
 		Body: map[string]string{
