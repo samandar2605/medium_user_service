@@ -51,6 +51,7 @@ func main() {
 	authService := service.NewAuthService(strg, inMemory, grpcConn, cfg)
 
 	lis, err := net.Listen("tcp", cfg.GrpcPort)
+	fmt.Println()
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -65,5 +66,5 @@ func main() {
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("Error while listening: %v", err)
 	}
-
+	
 }

@@ -46,12 +46,12 @@ func (s *AuthService) Register(ctx context.Context, req *pb.RegisterRequest) (*p
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Internal server error: %v", err)
 	}
-	fmt.Println("56 Auth'ga kirdi")
 
 	user := repo.User{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		Email:     req.Email,
+		Gender:    req.Gender,
 		Type:      repo.UserTypeUser,
 		Password:  hashedPassword,
 	}
@@ -60,7 +60,6 @@ func (s *AuthService) Register(ctx context.Context, req *pb.RegisterRequest) (*p
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Internal server error: %v", err)
 	}
-	fmt.Println("70 Auth'ga kirdi")
 
 	err = s.inMemory.Set("user_"+user.Email, string(userData), 10*time.Minute)
 	if err != nil {
@@ -237,10 +236,10 @@ func (s *AuthService) sendVerificationCode(key, email string) error {
 		},
 		Type: "verification_email",
 	})
+
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -259,5 +258,6 @@ func (s *AuthService) VerifyToken(ctx context.Context, req *pb.VerifyTokenReques
 		UserType:  payload.UserType,
 		IssuedAt:  payload.IssuedAt.Format(time.RFC3339),
 		ExpiredAt: payload.ExpiredAt.Format(time.RFC3339),
+		Password:  payload.Password,
 	}, nil
 }

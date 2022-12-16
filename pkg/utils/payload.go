@@ -18,6 +18,7 @@ type Payload struct {
 	ID        uuid.UUID `json:"id"`
 	UserID    int64     `json:"user_id"`
 	Email     string    `json:"email"`
+	Password  string    `json:"password"`
 	UserType  string    `json:"type"`
 	IssuedAt  time.Time `json:"issued_at"`
 	ExpiredAt time.Time `json:"expired_at"`
