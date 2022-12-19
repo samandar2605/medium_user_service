@@ -107,6 +107,7 @@ func (s *AuthService) Verify(ctx context.Context, req *pb.VerifyRequest) (*pb.Au
 		UserID:   result.ID,
 		UserType: result.Type,
 		Username: result.Username,
+		Password: result.Password,
 		Email:    result.Email,
 		Duration: time.Hour * 24,
 	})
@@ -142,6 +143,7 @@ func (s *AuthService) Login(ctx context.Context, req *pb.VerifyRequest) (*pb.Aut
 	token, _, err := utils.CreateToken(s.cfg, &utils.TokenParams{
 		UserID:   result.ID,
 		UserType: result.Type,
+		Password: result.Password,
 		Username: result.Username,
 		Email:    result.Email,
 		Duration: time.Hour * 24,
@@ -154,6 +156,7 @@ func (s *AuthService) Login(ctx context.Context, req *pb.VerifyRequest) (*pb.Aut
 		Id:          result.ID,
 		FirstName:   result.FirstName,
 		LastName:    result.LastName,
+		Password:    result.Password,
 		Email:       result.Email,
 		Username:    result.Username,
 		Type:        result.Type,
@@ -197,6 +200,7 @@ func (s *AuthService) VerifyForgotPassword(ctx context.Context, req *pb.VerifyRe
 	token, _, err := utils.CreateToken(s.cfg, &utils.TokenParams{
 		UserID:   result.ID,
 		UserType: result.Type,
+		Password: result.Password,
 		Username: result.Username,
 		Email:    result.Email,
 		Duration: time.Hour * 24,
@@ -211,6 +215,7 @@ func (s *AuthService) VerifyForgotPassword(ctx context.Context, req *pb.VerifyRe
 		LastName:    result.LastName,
 		Email:       result.Email,
 		Username:    result.Username,
+		Password:    result.Password,
 		Type:        result.Type,
 		CreatedAt:   result.CreatedAt.Format(time.RFC822),
 		AccessToken: token,

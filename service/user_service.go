@@ -44,13 +44,17 @@ func NewUserService(strg storage.StorageI, inMemory storage.InMemoryStorageI) *U
 }
 
 func (s *UserService) Create(ctx context.Context, req *pb.User) (*pb.User, error) {
+	hashedPassword, err := utils.HashPassword(req.Password)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Internal server error: %v", err)
+	}
 	user, err := s.storage.User().Create(&repo.User{
 		FirstName:       req.FirstName,
 		LastName:        req.LastName,
 		PhoneNumber:     req.PhoneNumber,
 		Email:           req.Email,
 		Gender:          req.Gender,
-		Password:        req.Password,
+		Password:        hashedPassword,
 		Username:        req.Username,
 		ProfileImageUrl: req.ProfileImageUrl,
 		Type:            req.Type,
@@ -97,6 +101,7 @@ func (s *UserService) Update(ctx context.Context, req *pb.User) (*pb.User, error
 		LastName:        req.LastName,
 		PhoneNumber:     req.PhoneNumber,
 		Email:           req.Email,
+		Gender:          req.Gender,
 		Username:        req.Username,
 		Password:        hashedPassword,
 		ProfileImageUrl: req.ProfileImageUrl,
