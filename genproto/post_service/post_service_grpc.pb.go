@@ -22,11 +22,12 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PostServiceClient interface {
-	Create(ctx context.Context, in *Post, opts ...grpc.CallOption) (*Post, error)
+	Create(ctx context.Context, in *CreatePost, opts ...grpc.CallOption) (*Post, error)
 	Get(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*Post, error)
 	GetAll(ctx context.Context, in *GetAllPostsRequest, opts ...grpc.CallOption) (*GetAllPostsResponse, error)
 	Update(ctx context.Context, in *Post, opts ...grpc.CallOption) (*Post, error)
 	Delete(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*Blank, error)
+	ViewInc(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*Blank, error)
 }
 
 type postServiceClient struct {
@@ -37,7 +38,7 @@ func NewPostServiceClient(cc grpc.ClientConnInterface) PostServiceClient {
 	return &postServiceClient{cc}
 }
 
-func (c *postServiceClient) Create(ctx context.Context, in *Post, opts ...grpc.CallOption) (*Post, error) {
+func (c *postServiceClient) Create(ctx context.Context, in *CreatePost, opts ...grpc.CallOption) (*Post, error) {
 	out := new(Post)
 	err := c.cc.Invoke(ctx, "/genproto.PostService/Create", in, out, opts...)
 	if err != nil {
@@ -82,15 +83,25 @@ func (c *postServiceClient) Delete(ctx context.Context, in *GetPostRequest, opts
 	return out, nil
 }
 
+func (c *postServiceClient) ViewInc(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*Blank, error) {
+	out := new(Blank)
+	err := c.cc.Invoke(ctx, "/genproto.PostService/ViewInc", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PostServiceServer is the server API for PostService service.
 // All implementations must embed UnimplementedPostServiceServer
 // for forward compatibility
 type PostServiceServer interface {
-	Create(context.Context, *Post) (*Post, error)
+	Create(context.Context, *CreatePost) (*Post, error)
 	Get(context.Context, *GetPostRequest) (*Post, error)
 	GetAll(context.Context, *GetAllPostsRequest) (*GetAllPostsResponse, error)
 	Update(context.Context, *Post) (*Post, error)
 	Delete(context.Context, *GetPostRequest) (*Blank, error)
+	ViewInc(context.Context, *GetPostRequest) (*Blank, error)
 	mustEmbedUnimplementedPostServiceServer()
 }
 
@@ -98,7 +109,7 @@ type PostServiceServer interface {
 type UnimplementedPostServiceServer struct {
 }
 
-func (UnimplementedPostServiceServer) Create(context.Context, *Post) (*Post, error) {
+func (UnimplementedPostServiceServer) Create(context.Context, *CreatePost) (*Post, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
 func (UnimplementedPostServiceServer) Get(context.Context, *GetPostRequest) (*Post, error) {
@@ -112,6 +123,9 @@ func (UnimplementedPostServiceServer) Update(context.Context, *Post) (*Post, err
 }
 func (UnimplementedPostServiceServer) Delete(context.Context, *GetPostRequest) (*Blank, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedPostServiceServer) ViewInc(context.Context, *GetPostRequest) (*Blank, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ViewInc not implemented")
 }
 func (UnimplementedPostServiceServer) mustEmbedUnimplementedPostServiceServer() {}
 
@@ -127,7 +141,7 @@ func RegisterPostServiceServer(s grpc.ServiceRegistrar, srv PostServiceServer) {
 }
 
 func _PostService_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Post)
+	in := new(CreatePost)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -139,7 +153,7 @@ func _PostService_Create_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: "/genproto.PostService/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostServiceServer).Create(ctx, req.(*Post))
+		return srv.(PostServiceServer).Create(ctx, req.(*CreatePost))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -216,6 +230,24 @@ func _PostService_Delete_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostService_ViewInc_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPostRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).ViewInc(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/genproto.PostService/ViewInc",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).ViewInc(ctx, req.(*GetPostRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PostService_ServiceDesc is the grpc.ServiceDesc for PostService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -242,6 +274,10 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _PostService_Delete_Handler,
+		},
+		{
+			MethodName: "ViewInc",
+			Handler:    _PostService_ViewInc_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

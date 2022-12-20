@@ -5,3 +5,21 @@ create table if not exists permissions(
     action varchar not null,
     unique(user_type,resource,action)
 );
+
+insert into permissions(user_type,resource,action)
+values('superadmin','categories','create');
+
+insert into permissions(user_type,resource,action)
+values('superadmin','categories','update');
+
+insert into permissions(user_type,resource,action)
+values('superadmin','categories','delete');
+
+insert into permissions(user_type,resource,action)
+values('user','users','create');
+
+insert into permissions(user_type,resource,action)
+values('user','users','update');
+
+insert into permissions(user_type,resource,action)
+values('user','users','delete');
