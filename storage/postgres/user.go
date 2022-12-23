@@ -1,11 +1,10 @@
 package postgres
 
 import (
-	"database/sql"
 	"fmt"
 
-
 	"github.com/jmoiron/sqlx"
+	"github.com/samandar2605/medium_user_service/pkg/utils"
 	"github.com/samandar2605/medium_user_service/storage/repo"
 )
 
@@ -20,6 +19,7 @@ func NewUser(db *sqlx.DB) repo.UserStorageI {
 }
 
 func (ur *userRepo) Create(user *repo.User) (*repo.User, error) {
+
 	query := `
 		INSERT INTO users(
 			first_name,
@@ -39,12 +39,12 @@ func (ur *userRepo) Create(user *repo.User) (*repo.User, error) {
 		query,
 		user.FirstName,
 		user.LastName,
-		user.PhoneNumber,
+		utils.NullString(user.PhoneNumber),
 		user.Email,
-		user.Gender,
+		utils.NullString(user.Gender),
 		user.Password,
-		user.Username,
-		user.ProfileImageUrl,
+		utils.NullString(user.Username),
+		utils.NullString(user.ProfileImageUrl),
 		user.Type,
 	)
 
@@ -209,21 +209,6 @@ func (ur *userRepo) Update(usr *repo.User) (*repo.User, error) {
 	return usr, nil
 }
 
-func (ur *userRepo) Delete(id int) error {
-	res, err := ur.db.Exec("delete from users where id=$1", id)
-	if err != nil {
-		return err
-	}
-	rows, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rows == 0 {
-		return sql.ErrNoRows
-	}
-	return nil
-}
-
 func (ur *userRepo) GetByEmail(email *string) (*repo.User, error) {
 	var result repo.User
 
@@ -273,5 +258,17 @@ func (ur *userRepo) UpdatePassword(req *repo.UpdatePassword) error {
 		return err
 	}
 
+	return nil
+}
+
+func (ur *userRepo) Delete(id int) error {
+	_, err := ur.db.Exec("delete from users where id=$1", id)
+	if err != nil {
+		return err
+	}
+
+	if err != nil {
+		return err
+	}
 	return nil
 }

@@ -224,12 +224,11 @@ func (s *AuthService) VerifyForgotPassword(ctx context.Context, req *pb.VerifyRe
 
 func (s *AuthService) sendVerificationCode(key, email string) error {
 	code, err := utils.GenerateRandomCode(6)
-	fmt.Println(code)
 	if err != nil {
 		return err
 	}
 
-	err = s.inMemory.Set(key+email, code, time.Minute)
+	err = s.inMemory.Set(key+email, code, time.Minute*2)
 	if err != nil {
 		return err
 	}

@@ -4,34 +4,34 @@ import (
 	"database/sql"
 	"errors"
 
-	_ "github.com/lib/pq"
-
 	"github.com/jmoiron/sqlx"
 	"github.com/samandar2605/medium_user_service/storage/repo"
 )
 
-type PermissionRepo struct {
+type permissionRepo struct {
 	db *sqlx.DB
 }
 
 func NewPermission(db *sqlx.DB) repo.PermissionStorageI {
-	return &PermissionRepo{
+	return &permissionRepo{
 		db: db,
 	}
 }
 
-func (ur *PermissionRepo)CheckPermission(userType,resourse,action string)(bool,error){
-	query:=`
-	select id from permissions
-	where user_type=$1 and resource=$2 and action=$3
+func (ur *permissionRepo) CheckPermission(userType, resource, action string) (bool, error) {
+	query := `
+		SELECT id FROM permissions
+		WHERE user_type=$1 AND resource=$2 AND action=$3
 	`
+
 	var id int64
-	err:=ur.db.QueryRow(query,userType,resourse,action).Scan(&id)
-	if err!=nil{
-		if errors.Is(err,sql.ErrNoRows){
-			return false,nil
+	err := ur.db.QueryRow(query, userType, resource, action).Scan(&id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
 		}
-		return false,err
+		return false, err
 	}
-	return true,nil 
+
+	return true, nil
 }
