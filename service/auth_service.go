@@ -9,10 +9,12 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/google/uuid"
 	"github.com/samandar2605/medium_user_service/config"
-	pbn "github.com/samandar2605/medium_user_service/genproto/notification_service"
 	pb "github.com/samandar2605/medium_user_service/genproto/user_service"
 	grpcPkg "github.com/samandar2605/medium_user_service/pkg/grpc_client"
+	messagebroker "github.com/samandar2605/medium_user_service/pkg/messagebroker"
 	"github.com/samandar2605/medium_user_service/pkg/utils"
 	"github.com/samandar2605/medium_user_service/storage"
 	"github.com/samandar2605/medium_user_service/storage/repo"
@@ -24,15 +26,21 @@ type AuthService struct {
 	inMemory   storage.InMemoryStorageI
 	grpcClient grpcPkg.GrpcClientI
 	cfg        *config.Config
+	kafka      *messagebroker.Kafka
 }
 
-func NewAuthService(strg storage.StorageI, inMemory storage.InMemoryStorageI, grpcConn grpcPkg.GrpcClientI, cfg config.Config) *AuthService {
+func NewAuthService(
+	strg storage.StorageI,
+	inMemory storage.InMemoryStorageI,
+	grpcConn grpcPkg.GrpcClientI,
+	cfg *config.Config,
+	kafka *messagebroker.Kafka) *AuthService {
 	return &AuthService{
-		storage:                        strg,
-		inMemory:                       inMemory,
-		grpcClient:                     grpcConn,
-		UnimplementedAuthServiceServer: pb.UnimplementedAuthServiceServer{},
-		cfg:                            &cfg,
+		storage:    strg,
+		inMemory:   inMemory,
+		grpcClient: grpcConn,
+		cfg:        cfg,
+		kafka:      kafka,
 	}
 }
 
@@ -67,7 +75,7 @@ func (s *AuthService) Register(ctx context.Context, req *pb.RegisterRequest) (*p
 	}
 
 	go func() {
-		err := s.sendVerificationCode(RegisterCodeKey, req.Email)
+		err := s.sendVerificationCodeKafka(RegisterCodeKey, req.Email)
 		if err != nil {
 			fmt.Printf("failed to send verification code: %v", err)
 		}
@@ -173,7 +181,7 @@ func (s *AuthService) ForgotPassword(ctx context.Context, req *pb.UserEmail) (*p
 	}
 
 	go func() {
-		err := s.sendVerificationCode(ForgotPasswordKey, req.Email)
+		err := s.sendVerificationCodeKafka(ForgotPasswordKey, req.Email)
 		if err != nil {
 			fmt.Printf("failed to send verification code: %v", err)
 		}
@@ -222,29 +230,35 @@ func (s *AuthService) VerifyForgotPassword(ctx context.Context, req *pb.VerifyRe
 	}, nil
 }
 
-func (s *AuthService) sendVerificationCode(key, email string) error {
+func (s *AuthService) sendVerificationCodeKafka(key, email string) error {
 	code, err := utils.GenerateRandomCode(6)
 	if err != nil {
 		return err
 	}
 
-	err = s.inMemory.Set(key+email, code, time.Minute*2)
+	err = s.inMemory.Set(key+email, code, time.Minute)
 	if err != nil {
 		return err
 	}
 
-	_, err = s.grpcClient.NotificationService().SendEmail(context.Background(), &pbn.SendEmailRequest{
-		To:      email,
-		Subject: "Verification email",
-		Body: map[string]string{
+	e := cloudevents.NewEvent()
+	e.SetID(uuid.New().String())
+	e.SetType("com.cloudevents.sample.sent")
+	e.SetSource("https://github.com/cloudevents/sdk-go/v2/samples/kafka/sender")
+	_ = e.SetData(cloudevents.ApplicationJSON, map[string]interface{}{
+		"to":   email,
+		"type": "verification_email",
+		"body": map[string]string{
 			"code": code,
 		},
-		Type: "verification_email",
+		"subject": "Verification email",
 	})
 
+	err = s.kafka.Push("v1.notification_service.send_email", e)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 

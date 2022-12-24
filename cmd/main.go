@@ -16,6 +16,7 @@ import (
 	"github.com/samandar2605/medium_user_service/service"
 	"github.com/samandar2605/medium_user_service/storage"
 
+	messagebroker "github.com/samandar2605/medium_user_service/pkg/messagebroker"
 	grpcPkg "github.com/samandar2605/medium_user_service/pkg/grpc_client"
 )
 
@@ -47,8 +48,12 @@ func main() {
 		log.Fatalf("failed to get grpc connections: %v", err)
 	}
 
+	kafka := messagebroker.NewKafka(cfg)
 	userService := service.NewUserService(strg, inMemory)
-	authService := service.NewAuthService(strg, inMemory, grpcConn, cfg)
+	authService := service.NewAuthService(
+		strg, inMemory, grpcConn,
+		&cfg,kafka,
+	)
 
 	lis, err := net.Listen("tcp", cfg.GrpcPort)
 	fmt.Println()

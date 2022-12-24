@@ -25,7 +25,7 @@ type PostServiceClient interface {
 	Create(ctx context.Context, in *CreatePost, opts ...grpc.CallOption) (*Post, error)
 	Get(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*Post, error)
 	GetAll(ctx context.Context, in *GetAllPostsRequest, opts ...grpc.CallOption) (*GetAllPostsResponse, error)
-	Update(ctx context.Context, in *Post, opts ...grpc.CallOption) (*Post, error)
+	Update(ctx context.Context, in *ChangePost, opts ...grpc.CallOption) (*Post, error)
 	Delete(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*Blank, error)
 	ViewInc(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*Blank, error)
 }
@@ -65,7 +65,7 @@ func (c *postServiceClient) GetAll(ctx context.Context, in *GetAllPostsRequest, 
 	return out, nil
 }
 
-func (c *postServiceClient) Update(ctx context.Context, in *Post, opts ...grpc.CallOption) (*Post, error) {
+func (c *postServiceClient) Update(ctx context.Context, in *ChangePost, opts ...grpc.CallOption) (*Post, error) {
 	out := new(Post)
 	err := c.cc.Invoke(ctx, "/genproto.PostService/Update", in, out, opts...)
 	if err != nil {
@@ -99,7 +99,7 @@ type PostServiceServer interface {
 	Create(context.Context, *CreatePost) (*Post, error)
 	Get(context.Context, *GetPostRequest) (*Post, error)
 	GetAll(context.Context, *GetAllPostsRequest) (*GetAllPostsResponse, error)
-	Update(context.Context, *Post) (*Post, error)
+	Update(context.Context, *ChangePost) (*Post, error)
 	Delete(context.Context, *GetPostRequest) (*Blank, error)
 	ViewInc(context.Context, *GetPostRequest) (*Blank, error)
 	mustEmbedUnimplementedPostServiceServer()
@@ -118,7 +118,7 @@ func (UnimplementedPostServiceServer) Get(context.Context, *GetPostRequest) (*Po
 func (UnimplementedPostServiceServer) GetAll(context.Context, *GetAllPostsRequest) (*GetAllPostsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAll not implemented")
 }
-func (UnimplementedPostServiceServer) Update(context.Context, *Post) (*Post, error) {
+func (UnimplementedPostServiceServer) Update(context.Context, *ChangePost) (*Post, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
 func (UnimplementedPostServiceServer) Delete(context.Context, *GetPostRequest) (*Blank, error) {
@@ -195,7 +195,7 @@ func _PostService_GetAll_Handler(srv interface{}, ctx context.Context, dec func(
 }
 
 func _PostService_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Post)
+	in := new(ChangePost)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -207,7 +207,7 @@ func _PostService_Update_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: "/genproto.PostService/Update",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostServiceServer).Update(ctx, req.(*Post))
+		return srv.(PostServiceServer).Update(ctx, req.(*ChangePost))
 	}
 	return interceptor(ctx, in, info, handler)
 }

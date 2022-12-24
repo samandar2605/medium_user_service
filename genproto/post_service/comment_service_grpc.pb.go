@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CommentServiceClient interface {
-	Create(ctx context.Context, in *CreateComment, opts ...grpc.CallOption) (*Comment, error)
+	Create(ctx context.Context, in *CreateCommentRequest, opts ...grpc.CallOption) (*Comment, error)
 	Get(ctx context.Context, in *IdWithRequest, opts ...grpc.CallOption) (*Comment, error)
 	GetAll(ctx context.Context, in *GetCommentQuery, opts ...grpc.CallOption) (*GetAllCommentsResult, error)
 	Update(ctx context.Context, in *Comment, opts ...grpc.CallOption) (*Comment, error)
@@ -37,7 +37,7 @@ func NewCommentServiceClient(cc grpc.ClientConnInterface) CommentServiceClient {
 	return &commentServiceClient{cc}
 }
 
-func (c *commentServiceClient) Create(ctx context.Context, in *CreateComment, opts ...grpc.CallOption) (*Comment, error) {
+func (c *commentServiceClient) Create(ctx context.Context, in *CreateCommentRequest, opts ...grpc.CallOption) (*Comment, error) {
 	out := new(Comment)
 	err := c.cc.Invoke(ctx, "/genproto.CommentService/Create", in, out, opts...)
 	if err != nil {
@@ -86,7 +86,7 @@ func (c *commentServiceClient) Delete(ctx context.Context, in *IdWithRequest, op
 // All implementations must embed UnimplementedCommentServiceServer
 // for forward compatibility
 type CommentServiceServer interface {
-	Create(context.Context, *CreateComment) (*Comment, error)
+	Create(context.Context, *CreateCommentRequest) (*Comment, error)
 	Get(context.Context, *IdWithRequest) (*Comment, error)
 	GetAll(context.Context, *GetCommentQuery) (*GetAllCommentsResult, error)
 	Update(context.Context, *Comment) (*Comment, error)
@@ -98,7 +98,7 @@ type CommentServiceServer interface {
 type UnimplementedCommentServiceServer struct {
 }
 
-func (UnimplementedCommentServiceServer) Create(context.Context, *CreateComment) (*Comment, error) {
+func (UnimplementedCommentServiceServer) Create(context.Context, *CreateCommentRequest) (*Comment, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
 func (UnimplementedCommentServiceServer) Get(context.Context, *IdWithRequest) (*Comment, error) {
@@ -127,7 +127,7 @@ func RegisterCommentServiceServer(s grpc.ServiceRegistrar, srv CommentServiceSer
 }
 
 func _CommentService_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateComment)
+	in := new(CreateCommentRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -139,7 +139,7 @@ func _CommentService_Create_Handler(srv interface{}, ctx context.Context, dec fu
 		FullMethod: "/genproto.CommentService/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CommentServiceServer).Create(ctx, req.(*CreateComment))
+		return srv.(CommentServiceServer).Create(ctx, req.(*CreateCommentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
