@@ -90,22 +90,15 @@ func (s *UserService) GetAll(ctx context.Context, req *pb.GetAllUsersRequest) (*
 	return &response, nil
 }
 
-func (s *UserService) Update(ctx context.Context, req *pb.User) (*pb.User, error) {
-	hashedPassword, err := utils.HashPassword(req.Password)
-	if err != nil {
-		return nil, err
-	}
-	user, err := s.storage.User().Update(&repo.User{
-		ID:              req.Id,
+func (s *UserService) Update(ctx context.Context, req *pb.UpdateUser) (*pb.User, error) {
+	user, err := s.storage.User().Update(&repo.UpdateUser{
+		Id:              req.Id,
 		FirstName:       req.FirstName,
 		LastName:        req.LastName,
 		PhoneNumber:     req.PhoneNumber,
-		Email:           req.Email,
 		Gender:          req.Gender,
 		Username:        req.Username,
-		Password:        hashedPassword,
 		ProfileImageUrl: req.ProfileImageUrl,
-		Type:            req.Type,
 	})
 	if err != nil {
 		return nil, err
@@ -114,10 +107,22 @@ func (s *UserService) Update(ctx context.Context, req *pb.User) (*pb.User, error
 	return parseUserModel(user), nil
 }
 
-func (s *UserService) Delete(ctx context.Context, req *pb.IdRequest) (*pb.Empty, error) {
-	err := s.storage.User().Delete(int(req.Id))
+func (s *UserService) Delete(ctx context.Context, req *pb.DeleteUserRequest) (*pb.Empty, error) {
+	err := s.storage.User().Delete(&repo.DeleteUserRequest{
+		Id: req.Id,
+	})
 	if err != nil {
+		
 		return nil, err
 	}
 	return nil, nil
+}
+
+func (s *UserService) GetByEmail(ctx context.Context, email *pb.GetByEmailRequest) (*pb.User, error) {
+	user, err := storage.StorageI.User(s.storage).GetByEmail(&email.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	return parseUserModel(user), nil
 }

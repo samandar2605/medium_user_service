@@ -26,6 +26,7 @@ type AuthServiceClient interface {
 	Verify(ctx context.Context, in *VerifyRequest, opts ...grpc.CallOption) (*AuthResponse, error)
 	Login(ctx context.Context, in *VerifyRequest, opts ...grpc.CallOption) (*AuthResponse, error)
 	ForgotPassword(ctx context.Context, in *UserEmail, opts ...grpc.CallOption) (*Empty, error)
+	UpdatePassword(ctx context.Context, in *NewPassword, opts ...grpc.CallOption) (*Empty, error)
 	VerifyToken(ctx context.Context, in *VerifyTokenRequest, opts ...grpc.CallOption) (*AuthPayload, error)
 	VerifyForgotPassword(ctx context.Context, in *VerifyRequest, opts ...grpc.CallOption) (*AuthResponse, error)
 }
@@ -74,6 +75,15 @@ func (c *authServiceClient) ForgotPassword(ctx context.Context, in *UserEmail, o
 	return out, nil
 }
 
+func (c *authServiceClient) UpdatePassword(ctx context.Context, in *NewPassword, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, "/genproto.AuthService/UpdatePassword", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *authServiceClient) VerifyToken(ctx context.Context, in *VerifyTokenRequest, opts ...grpc.CallOption) (*AuthPayload, error) {
 	out := new(AuthPayload)
 	err := c.cc.Invoke(ctx, "/genproto.AuthService/VerifyToken", in, out, opts...)
@@ -100,6 +110,7 @@ type AuthServiceServer interface {
 	Verify(context.Context, *VerifyRequest) (*AuthResponse, error)
 	Login(context.Context, *VerifyRequest) (*AuthResponse, error)
 	ForgotPassword(context.Context, *UserEmail) (*Empty, error)
+	UpdatePassword(context.Context, *NewPassword) (*Empty, error)
 	VerifyToken(context.Context, *VerifyTokenRequest) (*AuthPayload, error)
 	VerifyForgotPassword(context.Context, *VerifyRequest) (*AuthResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
@@ -120,6 +131,9 @@ func (UnimplementedAuthServiceServer) Login(context.Context, *VerifyRequest) (*A
 }
 func (UnimplementedAuthServiceServer) ForgotPassword(context.Context, *UserEmail) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ForgotPassword not implemented")
+}
+func (UnimplementedAuthServiceServer) UpdatePassword(context.Context, *NewPassword) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdatePassword not implemented")
 }
 func (UnimplementedAuthServiceServer) VerifyToken(context.Context, *VerifyTokenRequest) (*AuthPayload, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifyToken not implemented")
@@ -212,6 +226,24 @@ func _AuthService_ForgotPassword_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_UpdatePassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NewPassword)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).UpdatePassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/genproto.AuthService/UpdatePassword",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).UpdatePassword(ctx, req.(*NewPassword))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _AuthService_VerifyToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(VerifyTokenRequest)
 	if err := dec(in); err != nil {
@@ -270,6 +302,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ForgotPassword",
 			Handler:    _AuthService_ForgotPassword_Handler,
+		},
+		{
+			MethodName: "UpdatePassword",
+			Handler:    _AuthService_UpdatePassword_Handler,
 		},
 		{
 			MethodName: "VerifyToken",

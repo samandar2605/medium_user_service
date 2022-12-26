@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -34,6 +35,7 @@ func VerifyToken(cfg *config.Config, token string) (*Payload, error) {
 	keyFunc := func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
 		if !ok {
+			fmt.Println(38)
 			return nil, ErrInvalidToken
 		}
 		return []byte(cfg.AuthSecretKey), nil
@@ -45,11 +47,13 @@ func VerifyToken(cfg *config.Config, token string) (*Payload, error) {
 		if ok && errors.Is(verr.Inner, ErrExpiredToken) {
 			return nil, ErrExpiredToken
 		}
+		fmt.Println(50)
 		return nil, ErrInvalidToken
 	}
 
 	payload, ok := jwtToken.Claims.(*Payload)
 	if !ok {
+		fmt.Println(56)
 		return nil, ErrInvalidToken
 	}
 

@@ -18,8 +18,8 @@ func NewUser(db *sqlx.DB) repo.UserStorageI {
 	}
 }
 
-func (ur *userRepo) Create(user *repo.User) (*repo.User, error) {
-
+func (ur *userRepo) Create(usr *repo.User) (*repo.User, error) {
+	var user repo.User
 	query := `
 		INSERT INTO users(
 			first_name,
@@ -32,31 +32,51 @@ func (ur *userRepo) Create(user *repo.User) (*repo.User, error) {
 			profile_image_url,
 			type
 		) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)
-		RETURNING id, created_at
+		RETURNING 
+			id,
+			first_name,
+			last_name,
+			COALESCE(phone_number,'') as phone_number,
+			email,
+			gender,
+			password,
+			COALESCE(username,'') as username,
+			COALESCE(profile_image_url,'') as profile_image_url,
+			type,
+			created_at
 	`
 
 	row := ur.db.QueryRow(
 		query,
-		user.FirstName,
-		user.LastName,
-		utils.NullString(user.PhoneNumber),
-		user.Email,
-		utils.NullString(user.Gender),
-		user.Password,
-		utils.NullString(user.Username),
-		utils.NullString(user.ProfileImageUrl),
-		user.Type,
+		usr.FirstName,
+		usr.LastName,
+		utils.NullString(usr.PhoneNumber),
+		usr.Email,
+		usr.Gender,
+		usr.Password,
+		utils.NullString(usr.Username),
+		utils.NullString(usr.ProfileImageUrl),
+		usr.Type,
 	)
 
 	err := row.Scan(
 		&user.ID,
+		&user.FirstName,
+		&user.LastName,
+		&user.PhoneNumber,
+		&user.Email,
+		&user.Gender,
+		&user.Password,
+		&user.Username,
+		&user.ProfileImageUrl,
+		&user.Type,
 		&user.CreatedAt,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	return user, nil
+	return &user, nil
 }
 
 func (ur *userRepo) Get(id int64) (*repo.User, error) {
@@ -67,12 +87,12 @@ func (ur *userRepo) Get(id int64) (*repo.User, error) {
 			id,
 			first_name,
 			last_name,
-			phone_number,
+			COALESCE(phone_number,'') as phone_number,
 			email,
 			gender,
 			password,
-			username,
-			profile_image_url,
+			COALESCE(username,'') as username,
+			COALESCE(profile_image_url, '') as profile_image_url,
 			type,
 			created_at
 		FROM users
@@ -124,12 +144,12 @@ func (ur *userRepo) GetAll(params *repo.GetAllUsersParams) (*repo.GetAllUsersRes
 			id,
 			first_name,
 			last_name,
-			phone_number,
+			COALESCE(phone_number,'') as phone_number,
 			email,
 			gender,
 			password,
-			username,
-			profile_image_url,
+			COALESCE(username,'') as username,
+			COALESCE(profile_image_url,'') as profile_image_url,
 			type,
 			created_at
 		FROM users
@@ -176,7 +196,8 @@ func (ur *userRepo) GetAll(params *repo.GetAllUsersParams) (*repo.GetAllUsersRes
 	return &result, nil
 }
 
-func (ur *userRepo) Update(usr *repo.User) (*repo.User, error) {
+func (ur *userRepo) Update(usr *repo.UpdateUser) (*repo.User, error) {
+	var user repo.User
 	query := `
 		update users set 
 			first_name=$1,
@@ -185,28 +206,49 @@ func (ur *userRepo) Update(usr *repo.User) (*repo.User, error) {
 			gender=$4,
 			username=$5,
 			profile_image_url=$6
-		where id=$7
+		where id=$7 
 		returning
+			id,
+			first_name,
+			last_name,
+			COALESCE(phone_number,'') as phone_number,
 			email,
+			gender,
+			password,
+			COALESCE(username,'') as username,
+			COALESCE(profile_image_url, '') as profile_image_url,
 			type,
 			created_at
 	`
+
 	row := ur.db.QueryRow(
 		query,
 		usr.FirstName,
 		usr.LastName,
-		usr.PhoneNumber,
-		usr.Gender,
+		utils.NullString(usr.PhoneNumber),
+		utils.NullString(usr.Gender),
 		usr.Username,
-		usr.ProfileImageUrl,
-		usr.ID,
+		utils.NullString(usr.ProfileImageUrl),
+		usr.Id,
 	)
 
-	if err := row.Scan(&usr.Email, &usr.Type, &usr.CreatedAt); err != nil {
+	if err := row.Scan(
+		&user.ID,
+		&user.FirstName,
+		&user.LastName,
+		&user.PhoneNumber,
+		&user.Email,
+		&user.Gender,
+		&user.Password,
+		&user.Username,
+		&user.ProfileImageUrl,
+		&user.Type,
+		&user.CreatedAt,
+	); err != nil {
 		return nil, err
 	}
 
-	return usr, nil
+	return &user, nil
 }
 
 func (ur *userRepo) GetByEmail(email *string) (*repo.User, error) {
@@ -216,25 +258,24 @@ func (ur *userRepo) GetByEmail(email *string) (*repo.User, error) {
 		SELECT
 			id,
 			first_name,
-			last_name,
-			phone_number,
+			COALESCE(last_name,'') as last_name,
+			COALESCE(phone_number,'') as phone_number,
 			email,
-			gender,
+			COALESCE(gender,'male') as gender,
 			password,
-			username,
-			profile_image_url,
+			COALESCE(username,'') as username,
+			COALESCE(profile_image_url,'') as profile_image_url,
 			type,
 			created_at
 		FROM users
 		WHERE email=$1
 	`
-
 	row := ur.db.QueryRow(query, email)
 	err := row.Scan(
 		&result.ID,
 		&result.FirstName,
 		&result.LastName,
-		&result.PhoneNumber,
+		&result.Password,
 		&result.Email,
 		&result.Gender,
 		&result.Password,
@@ -261,14 +302,11 @@ func (ur *userRepo) UpdatePassword(req *repo.UpdatePassword) error {
 	return nil
 }
 
-func (ur *userRepo) Delete(id int) error {
-	_, err := ur.db.Exec("delete from users where id=$1", id)
+func (ur *userRepo) Delete(req *repo.DeleteUserRequest) error {
+	_, err := ur.db.Exec("delete from users where id=$1", req.Id)
 	if err != nil {
 		return err
 	}
 
-	if err != nil {
-		return err
-	}
 	return nil
 }

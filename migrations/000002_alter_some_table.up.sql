@@ -6,49 +6,65 @@ create table if not exists permissions(
     unique(user_type,resource,action)
 );
 
--- Admin
+--- Admin permissions
+--Categories
 insert into permissions(user_type,resource,action)
 values('superadmin','categories','create');
 insert into permissions(user_type,resource,action)
 values('superadmin','categories','update');
 insert into permissions(user_type,resource,action)
 values('superadmin','categories','delete');
+
+--Users
 insert into permissions(user_type,resource,action)
 values('superadmin','users','create');
 insert into permissions(user_type,resource,action)
 values('superadmin','users','update');
 insert into permissions(user_type,resource,action)
 values('superadmin','users','delete');
+
+--Comments
 insert into permissions(user_type,resource,action)
 values('superadmin','comments','delete');
+
+--Posts
 insert into permissions(user_type,resource,action)
 values('superadmin','posts','delete');
 
--- User
+
+
+
+--- User permissions
+
+--Likes
 insert into permissions(user_type,resource,action)
-values('user','categories','create');
+values('user','likes','create');
 insert into permissions(user_type,resource,action)
-values('user','categories','update');
-insert into permissions(user_type,resource,action)
-values('user','categories','delete');
-insert into permissions(user_type,resource,action)
-values('user','likes','likes');
-insert into permissions(user_type,resource,action)
-values('user','likes','likes/user-post');
+values('user','likes','get');
+
+--Comments
 insert into permissions(user_type,resource,action)
 values('user','comments','create');
 insert into permissions(user_type,resource,action)
 values('user','comments','update');
 insert into permissions(user_type,resource,action)
 values('user','comments','delete');
+
+-- Posts
 insert into permissions(user_type,resource,action)
 values('user','posts','create');
 insert into permissions(user_type,resource,action)
 values('user','posts','update');
 insert into permissions(user_type,resource,action)
 values('user','posts','delete');
+
+--Auth
 insert into permissions(user_type,resource,action)
-values('user','auth','/auth/update-password');
+values('user','auth','update-password');
+insert into permissions(user_type,resource,action)
+values('user','users','update');
+insert into permissions(user_type,resource,action)
+values('user','users','delete');
 
 
 
